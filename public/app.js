@@ -55,7 +55,8 @@ function apiURL(force) {
   if (state.custom.length) p.set('extra', JSON.stringify(state.custom.map((c) => ({ url: c.url, name: c.name }))));
   if (force) p.set('force', '1');
   const q = p.toString();
-  return '/api/news' + (q ? '?' + q : '');
+  // 相对路径：本地服务在根目录，GitHub Pages 在 /仓库名/ 子路径下都能命中
+  return 'api/news' + (q ? '?' + q : '');
 }
 
 let knownSources = [];
@@ -82,7 +83,7 @@ async function loadPayload(force) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
       if (json.error) throw new Error(json.error);
-      state.staticMode = !url.startsWith('/api/');
+      state.staticMode = !url.startsWith('api/');
       return json;
     } catch (e) {
       lastErr = e;

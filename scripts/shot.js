@@ -21,6 +21,8 @@ const getArg = (name, def) => {
 };
 const js = getArg('--js', '');
 const full = args.includes('--full');
+const wait = Number(getArg('--wait', 3500));
+const logConsole = args.includes('--log');
 const width = Number(getArg('--w', 390));
 const height = Number(getArg('--h', 844));
 const url = getArg('--url', 'http://localhost:4173/');
@@ -57,6 +59,13 @@ async function main() {
       const { resolve, reject } = pending.get(msg.id);
       pending.delete(msg.id);
       msg.error ? reject(new Error(msg.error.message)) : resolve(msg.result);
+    } else if (logConsole && msg.method === 'Runtime.consoleAPICalled') {
+      console.log('[console]', msg.params.args.map((a) => a.value ?? a.description).join(' '));
+    } else if (logConsole && msg.method === 'Runtime.exceptionThrown') {
+      console.log('[error]', msg.params.exceptionDetails.text, msg.params.exceptionDetails.exception?.description || '');
+    } else if (logConsole && msg.method === 'Network.responseReceived') {
+      const r = msg.params.response;
+      if (/news\.json|api\/news/.test(r.url)) console.log('[net]', r.status, r.url.slice(-60));
     }
   });
 
@@ -68,12 +77,13 @@ async function main() {
 
   await new Promise((r) => ws.addEventListener('open', r));
   await send('Page.enable');
+  await send('Network.enable');
   await send('Runtime.enable');
   await send('Emulation.setDeviceMetricsOverride', {
     width, height, deviceScaleFactor: 2, mobile: true
   });
   await send('Page.navigate', { url });
-  await sleep(3500);
+  await sleep(wait);
 
   if (js) {
     await send('Runtime.evaluate', { expression: js, awaitPromise: true });

@@ -1,0 +1,19 @@
+# 依赖
+node_modules/
+
+# 构建产物（由 GitHub Actions 生成）
+dist/
+public/data/
+
+# 本地运行产生的快照
+data/
+
+# 工具与本地产物
+.workbuddy/
+.shots/
+.tmp-*
+*.log
+
+# 系统
+.DS_Store
+Thumbs.db

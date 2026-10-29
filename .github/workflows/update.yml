@@ -1,0 +1,52 @@
+name: 更新内容并发布
+
+on:
+  schedule:
+    # 每 30 分钟抓一次（GitHub 的定时任务可能延迟几分钟，属正常现象）
+    - cron: '*/30 * * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 抓取 / 聚类 / 生成静态数据
+        run: node scripts/build-static.js --out dist
+
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+
+      - name: 打包产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 发布到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

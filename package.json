@@ -1,0 +1,13 @@
+{
+  "name": "qingliu",
+  "version": "1.0.0",
+  "private": true,
+  "description": "清流 · 每日信息精选",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "snapshot": "node scripts/bake.js"
+  },
+  "engines": { "node": ">=18" }
+}

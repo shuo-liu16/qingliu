@@ -1,4 +1,4 @@
-const CACHE = 'qingliu-v3';
+const CACHE = 'qingliu-v4';
 const SHELL = ['./', 'styles.css', 'app.js', 'manifest.webmanifest', 'icon.svg'];
 
 self.addEventListener('install', (e) => {

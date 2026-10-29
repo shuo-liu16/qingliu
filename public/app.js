@@ -510,7 +510,7 @@ function openSheet(id) {
 
   $('#sheetMask').hidden = false;
   sheet.hidden = false;
-  document.body.style.overflow = 'hidden';
+  document.documentElement.classList.add('is-locked');
 
   render();
 }
@@ -532,7 +532,7 @@ function closeSheet() {
   sheet.hidden = true;
   sheet.style.transform = '';
   sheet.style.transition = '';
-  document.body.style.overflow = '';
+  document.documentElement.classList.remove('is-locked');
   sheetItem = null;
   render();
 }
@@ -735,6 +735,14 @@ document.addEventListener('click', async (e) => {
 });
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+// 兜底：浮层已经关掉却还被锁着滚动时，自动解锁（切后台回来、页面恢复等场景）
+function unlockIfIdle() {
+  if ($('#sheet').hidden) document.documentElement.classList.remove('is-locked');
+}
+window.addEventListener('pageshow', unlockIfIdle);
+window.addEventListener('focus', unlockIfIdle);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) unlockIfIdle(); });
 
 window.addEventListener('scroll', () => {
   $('#topbar').classList.toggle('is-scrolled', window.scrollY > 4);
